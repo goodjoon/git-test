@@ -13,6 +13,7 @@
 //=============================================================================================
 
 // TESTNet, Geth 선택 _test=true -> TESTNet 접근. 접근 ip, port 변경시 아래의 _url 변경필요
+
 var _test = false;
 var _supplycontract = "0x0beafde7493ee4ff38a6dcb544093e327c61a33d";
 var _transportContract = "0x072a531012112a076188d1c20d4347f29c2e3386";
