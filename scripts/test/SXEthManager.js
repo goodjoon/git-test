@@ -1,0 +1,2 @@
+var Wallet = require('./SXWallet');
+

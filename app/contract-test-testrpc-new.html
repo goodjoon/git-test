@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contract Test</title>
+    <script type="text/javascript" src="../bower_components/web3/dist/web3.js"></script>
+    <script type="text/javascript">
+        var Web3 = require('web3');
+        var web3 = new Web3();
+
+        // GETH Node2 환경
+        //web3.setProvider(new web3.providers.HttpProvider("http://10.77.135.188:8547"));
+        //var sender = "0x02C370C2B797B2E71AD79BD2D9810534F55A4F08";
+        //web3.personal.unlockAccount(sender, "1111");
+
+        // TESTRPC 환경
+        web3.setProvider(new web3.providers.HttpProvider("http://10.77.135.188:8545"));
+        var sender = "0x3dabd2bdba3a73423837e79d4349c4ff0757531c";
+
+        var abi = [{"constant":false,"inputs":[{"name":"_addr","type":"address"},{"name":"_name","type":"bytes32"}],"name":"registerSupply_test","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"}],"name":"registerSupply","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_page","type":"int256"}],"name":"getSupplierList","outputs":[{"name":"items_","type":"int256"},{"name":"supplierAddrs_","type":"address[10]"},{"name":"supplierNames_","type":"bytes32[10]"}],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_unitPrice","type":"uint256"},{"name":"_duration","type":"uint256"}],"name":"registerPart","outputs":[{"name":"id","type":"uint256"}],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"supplierAddr","type":"address"},{"indexed":false,"name":"supplierName","type":"bytes32"}],"name":"SupplierRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"supplierAddr","type":"address"},{"indexed":false,"name":"supplierName","type":"bytes32"},{"indexed":false,"name":"partName","type":"bytes32"}],"name":"PartRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"code","type":"uint256"},{"indexed":false,"name":"msg","type":"bytes32"}],"name":"Error","type":"event"}];
+        var code = "60606040525b33600060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908302179055505b610a718061003f6000396000f360606040523615610069576000357c01000000000000000000000000000000000000000000000000000000009004806340361a47146100af57806341c0e1b5146100d057806384698f93146100df578063c65e0a9a146100f7578063e4c518c61461016757610069565b6100ad5b60405180807f4e6f20636f6e7472616374206d6574686f6420696e2054780000000000000000815260200150601801905060405180910390a0610002565b565b005b6100ce60048080359060200190919080359060200190919050506101a5565b005b6100dd60048050506103b9565b005b6100f5600480803590602001909190505061044d565b005b61010d6004808035906020019091905050610660565b6040518084815260200183600a602002808383829060006004602084601f0104600f02600301f15090500182600a602002808383829060006004602084601f0104600f02600301f150905001935050505060405180910390f35b61018f6004808035906020019091908035906020019091908035906020019091905050610845565b6040518082815260200191505060405180910390f35b6000600260005060008473ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141561027e577fd2298b4c8df464512c1776f0efdc484c55970d9dfeb93f1243a471257583d19b606560405180828152602001807f537570706c69657220616c72656164792072656769737465726564000000000081526020015060200191505060405180910390a1610002565b81600260005060008473ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff0219169083021790555080600260005060008473ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060010160005081905550816001600050600160005080549050815481101561000257906000526020600020900160005b6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908302179055507f8702625a625e4cd6f3925c4a39cf378c8a3a1d6742788f814ef720d1faf7f06c3382604051808373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15b5050565b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561044a57600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5b565b6000600260005060003373ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161415610526577fd2298b4c8df464512c1776f0efdc484c55970d9dfeb93f1243a471257583d19b606560405180828152602001807f537570706c69657220616c72656164792072656769737465726564000000000081526020015060200191505060405180910390a1610002565b33600260005060003373ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff0219169083021790555080600260005060003373ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060010160005081905550336001600050600160005080549050815481101561000257906000526020600020900160005b6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908302179055507f8702625a625e4cd6f3925c4a39cf378c8a3a1d6742788f814ef720d1faf7f06c3382604051808373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a15b50565b600061014060405190810160405280600a905b60008152602001906001900390816106735790505061014060405190810160405280600a905b60008152602001906001900390816106995790505060006000600060006000600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561083857600a8902945060016000508054905093508484039250600083121561073c576000975087506108395661074d565b600a83131561074c57600a925082505b5b60009150600090505b828501811215610833576001600050818601815481101561000257906000526020600020900160005b9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1691508150818782600a811015610002579090602002019073ffffffffffffffffffffffffffffffffffffffff16908181526020015050600260005060008373ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600050600101600050548682600a81101561000257909060200201909081815260200150505b8080600101915050610756565b610839565b5b50505050509193909250565b6000600060006000600260005060003373ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060005060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161415610924577fd2298b4c8df464512c1776f0efdc484c55970d9dfeb93f1243a471257583d19b606660405180828152602001807f596f75277265206e6f74206120636f6e747261637465652e000000000000000081526020015060200191505060405180910390a1610002565b600260005060003373ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600050915081600201600050805490509050809250825080826003016000506000838152602001908152602001600020600050600001600050819055508582600301600050600083815260200190815260200160002060005060010160005081905550848260030160005060008381526020019081526020016000206000506002016000508190555083826003016000506000838152602001908152602001600020600050600301600050819055507fdf5be2dafc0a4f265ceb3734eda7c26710f33c9e49af5db64fd32a1df7e6ec0633836001016000505488604051808473ffffffffffffffffffffffffffffffffffffffff168152602001838152602001828152602001935050505060405180910390a1610a68565b5050939250505056";
+        var Contract = web3.eth.contract(abi);
+
+
+        console.log("Deploying Contract..");
+
+        var contract = Contract.new({ "from":sender , "data" : code, "gas" : 4700000}, function (error, contract) {
+            if (contract.address != undefined) {
+                console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
+
+                /*
+                // Register Event Listener
+                contract.allEvents(function(error, log) {
+                    if (error != undefined) {
+                        console.error(error);
+                        return;
+                    }
+
+                    console.log("[Event Coming]", log);
+                }); */
+
+                /*
+                var message = contract.Message();
+                message.watch(function(err, msg) {
+                    //console.log(web3.toAscii(msg.args.msg) + " , " + msg.args.value.toString());
+                    console.log(web3.toAscii(msg.args.condition));
+                });*/
+
+                // Send setString() message transaction
+                console.log("Contract Creation and Sending Message Done. Just waiting for event...");
+            }
+        });
+    </script>
+</head>
+<body>
+[NEW] Contract Test Page<br/>
+Contract Address : 0xf3164382837a34f13671e48f96c07946a9cb56e9
+</body>
+</html>

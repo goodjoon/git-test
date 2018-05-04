@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contract Test</title>
+    <script type="text/javascript" src="../bower_components/web3/dist/web3.js"></script>
+    <script type="text/javascript">
+        var Web3 = require('web3');
+        var web3 = new Web3();
+
+        // GETH Node2 환경
+        //web3.setProvider(new web3.providers.HttpProvider("http://10.77.135.188:8547"));
+        //var sender = "0x3dabd2bdba3a73423837e79d4349c4ff0757531c";
+        //web3.personal.unlockAccount(sender, "1111");
+
+        // TESTRPC 환경
+        web3.setProvider(new web3.providers.HttpProvider("http://10.77.135.188:8545"));
+        var sender = web3.eth.accounts[0];
+
+        var abi = [{"constant":false,"inputs":[{"name":"_addr","type":"address"},{"name":"_name","type":"bytes32"}],"name":"registerSupply_test","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_page","type":"int256"},{"name":"_supplierAddress","type":"address"}],"name":"listPart","outputs":[{"name":"items_","type":"int256"},{"name":"id_","type":"uint256[10]"},{"name":"productName_","type":"bytes32[10]"},{"name":"unitPrice_","type":"uint256[10]"},{"name":"duration_","type":"uint256[10]"}],"type":"function"},{"constant":false,"inputs":[{"name":"_addr1","type":"address"},{"name":"_addr2","type":"address"},{"name":"_val","type":"uint256"}],"name":"testStruct","outputs":[{"name":"length_","type":"uint256"},{"name":"addr1_","type":"address[10]"},{"name":"addr2_","type":"address[10]"},{"name":"val_","type":"uint256[10]"}],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"}],"name":"registerSupply","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_page","type":"int256"}],"name":"getSupplierList","outputs":[{"name":"items_","type":"int256"},{"name":"supplierAddrs_","type":"address[10]"},{"name":"supplierNames_","type":"bytes32[10]"}],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_unitPrice","type":"uint256"},{"name":"_duration","type":"uint256"}],"name":"registerPart","outputs":[{"name":"id_","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[],"name":"getJoon","outputs":[{"name":"","type":"bytes32"}],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"supplierAddr","type":"address"},{"indexed":false,"name":"supplierName","type":"bytes32"}],"name":"SupplierRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"supplierAddr","type":"address"},{"indexed":false,"name":"supplierName","type":"bytes32"},{"indexed":false,"name":"partName","type":"bytes32"},{"indexed":false,"name":"totalItems","type":"uint256"}],"name":"PartRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"code","type":"uint256"},{"indexed":false,"name":"msg","type":"bytes32"}],"name":"Error","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"message","type":"bytes32"}],"name":"Message","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"message","type":"bytes32"},{"indexed":false,"name":"val","type":"uint256"}],"name":"MessageUint","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"message","type":"bytes32"},{"indexed":false,"name":"addr","type":"address"}],"name":"MessageAddress","type":"event"}];
+        var Contract = web3.eth.contract(abi);
+        var contract = Contract.at("0x293a300011880f967229701e22e3803643733e6b");
+
+        console.log("Contract Use READY.");
+
+        /*
+        // Register Event Listener
+        contract.allEvents(function(error, log) {
+            if (error != undefined) {
+                console.error(error);
+                return;
+            }
+
+            console.log("[Event Coming]", log);
+        }); */
+
+
+        var message = contract.Message();
+        message.watch(function(err, msg) {
+            //console.log(web3.toAscii(msg.args.msg) + " , " + msg.args.value.toString());
+            console.log(web3.toAscii(msg.args.message));
+        });
+
+        var messageUint = contract.MessageUint();
+        messageUint.watch(function(err, msg) {
+            console.log(web3.toAscii(msg.args.message)," : ", msg.args.val.toString());
+        });
+
+        var messageAddress = contract.MessageAddress();
+        messageAddress.watch(function(err, msg) {
+            console.log(web3.toAscii(msg.args.message)," : ", msg.args.addr);
+        });
+
+        var registered = contract.SupplierRegistered();
+        registered.watch(function(err, msg) {
+            console.log(msg);
+            console.log(msg.args.supplierAddr, web3.toAscii(msg.args.supplierName));
+        });
+
+        var part = contract.PartRegistered();
+        part.watch(function(err, msg) {
+            console.log(msg);
+            console.log(msg.args.supplierAddr, web3.toAscii(msg.args.supplierName),
+                web3.toAscii(msg.args.partName), msg.args.totalItems.toString());
+        });
+
+        var error = contract.Error();
+        error.watch(function(err, msg) {
+            console.log(msg);
+            console.log(msg.args.code, web3.toAscii(msg.args.msg));
+        });
+    </script>
+</head>
+<body>
+[AT] Contract Test Page<br/>
+Contract Address : 0x187ef2014ab0d07a4c7097d372f81e9651062259
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Transporter</title>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+	<script type="text/javascript" src="bower_components/bignumber.js/bignumber.min.js"></script>
+	<script type="text/javascript" src="bower_components/web3/dist/web3.js"></script>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="joon_utils.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="scripts/sxeth.js"></script>
+	<link rel="stylesheet" type="text/css" href="loading.css">
+</head>
+<body>
+
+	<div id="loading">
+		<div class="square">
+			<div class="spin"></div>
+		</div>
+	</div>
+	<div class="container-fluid">
+		<div class = "col-sm-12">
+
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header navbar-center">
+						<a class="navbar-brand" id="title">운송 지시 목록</a>
+					</div>
+					<div class="navbar-header navbar-right">
+						<ul class="nav navbar-nav">
+							<li><a href="#" id="balance"></a></li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+
+			<div class = "col-sm-12">
+				<div class="col-xs-12" style="height:10px;"></div>
+				<table id="id_transport_table" class="table table-hover">
+					<thead> 
+						<tr>
+							<th data-field="">출하장소</th>
+							<th data-field="">품목</th>
+							<th data-field="">수량</th>
+							<th data-field="">인도처</th>
+							<th data-field="">인도기한</th>
+							<th data-field="">상태</th>
+							<th data-field="">조치</th>
+						</tr>
+					</thead>
+					<tbody id="id_transport_table_body">
+
+					</tbody>
+				</table>
+
+				<div class="col-xs-12" style="text-align:center;" id = "id_delievery_page" ></div>
+				<div class="col-xs-12" style="height:10px;"></div>
+				<div class="col-xs-12" style="height:10px;"></div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	// Dependent Files 
+	// loading.css 로딩 UI css
+	// common.js 각종 설정(url, account index...)
+	var _max_page_for_delievery_table = 0;
+	var _current_page_for_delievery_table = 1;
+
+	//web3, wallet 초기화
+	var Web3 = require('web3');
+	var web3 = new Web3();
+	web3.setProvider(new web3.providers.HttpProvider(_url));
+	var Wallet = require('wallet');
+	var wallet = new Wallet(web3);
+
+	//계정 초기화
+	var accounts = web3.eth.accounts;
+	var _addr = accounts[_transporter_index];
+	
+	//Contract 설정
+	var _contractInstance = "";
+	if(_transportContract !== undefined){
+		var Contract = web3.eth.contract(_abi_transport);
+		_contractInstance = Contract.at(_transportContract);
+		_contractInstance.EventStatusChange(OnStatusChange);
+		_contractInstance.NewDelievery(OnNewDelievery);
+	}
+
+	window.onload = function(){
+		if(_transportContract === undefined){
+	
+			//Contract가 정의 되어 있지 않을시 deploy
+			DeployContract();
+		}else{
+	
+			//계정 Unlock
+			UnlockAccount();
+	
+			//운송목록 페이지 UI 갱신
+			CreatePageUI();
+	
+			//운송목록 테이블 갱신
+			LoadTransportTable(_current_page_for_delievery_table);
+		}
+	
+		//잔고 갱신
+		UpdateBalance();
+	}
+	
+	//Contract Deploy
+	function DeployContract(){
+		loading_st();
+		UnlockAccount();
+		var Contract = web3.eth.contract(_abi_transport);
+		Contract.new( 
+			{"from": _addr,
+			"data": _code_transport,
+			"gas": _gas},
+			function(error, contract){
+				if(error){
+					console.log(error);
+				}
+				if(contract !== undefined && contract.address !== undefined){
+					console.log('     [Contract address] ' + contract.address);
+	
+					//Contract 인스턴스 생성 및 이벤트 핸들러 등록
+					_transportContract = contract.address;
+					_contractInstance = Contract.at(_transportContract);
+					_contractInstance.EventStatusChange(OnStatusChange);
+					_contractInstance.NewDelievery(OnNewDelievery);
+	
+					//운송목록 페이지 UI 갱신
+					CreatePageUI();
+	
+					//운송목록 테이블 갱신
+					LoadTransportTable(_current_page_for_delievery_table);
+	
+					//로딩중 UI 정지
+					loading_ed();
+				}else{
+					console.log('[Tx hash] ' + contract.transactionHash);
+				}
+			}
+			);
+		console.log("function DeployContract()");
+	}
+
+	//Event Callback ====================================================================================================================
+	
+	//새 운송요청이 발생하는 이벤트 
+	// - 운송목록 페이지 UI 갱신, 운송목록 테이블 갱신
+	function OnNewDelievery(error, result){
+		if(error==null){
+			console.log(result);
+			CreatePageUI();
+			LoadTransportTable(_current_page_for_delievery_table);
+
+			//실시간 목록에 추가
+			// var contents = document.getElementById('id_transport_table_body').innerHTML;
+			// contents += '<tr id='+ result.args.eDelieveryId + '><th>'+ web3.toAscii(result.args.eSrc) + '</th><th>' + web3.toAscii(result.args.ePart) + '</th><th>' + result.args.eQty + '</th><th>' + web3.toAscii(result.args.eDest) + '</th><th>' + web3.toAscii(result.args.eDate) + '</th><th>' + GetStatus(result.args.eStatus) + '</th><th>' + GetAction(result.args.eStatus)+'</th></tr>';
+			// document.getElementById('id_transport_table_body').innerHTML = contents;
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+	
+	//공급사, 제조사, 운송사의 Action으로 운송내역의 상태가 변경되었을시, 실시간으로 상태동기화 시켜준다.
+	function OnStatusChange(error, log){
+		if(error==null){
+			console.log('     [ID : ' + log.args.id + '] 상태 :' + GetStatus(log.args.status));
+			if(log.args.status == 1){
+				UpdateRow(log.args.id, "운송중", "-");
+			}else if(log.args.status == 2){
+				UpdateRow(log.args.id, "운송완료", "-");
+			}
+			UpdateBalance();
+			loading_ed();
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+	
+	//Event Callback Sub====================================================================================================================
+	
+	//0. 공급사 출고완료 클릭 -> 운송요청    -> *운송지시*
+	//1. 운송사 운송지시 클릭 -> 운송중      -> *-*
+	//2. 제조사 인수확인 클릭 -> 운송완료    -> *-*
+	
+	//주문의 상태에 따라 적절한 문구를 표출해준다.
+	function GetStatus(status){
+		if(status == 0){
+			return '운송요청';
+		}else if(status ==1){       
+			return '운송중';
+		}else{                      
+			return '운송완료';
+		}
+	}
+	
+	//상태에 따른 조치방법을 불러온다.
+	function GetAction(status){
+		if(status == 0){
+			return "<button class='btn btn-warning' onclick='Transport($(this))'>운송지시</button>";
+		}else{
+			return '-';
+		}
+	}
+	
+	//업무 진행에 따른 Row 상태 반영
+	function UpdateRow(id, status, action){
+		if(document.getElementById("id_transport_table").rows.namedItem(id)){
+			document.getElementById("id_transport_table").rows.namedItem(id).cells.item(5).innerHTML = status;
+			document.getElementById("id_transport_table").rows.namedItem(id).cells.item(6).innerHTML = action;  
+		}
+	}
+
+	//잔고 호출
+	function UpdateBalance(){
+		$('#title').text('운송 지시 목록 ('+_transporter_name + ': ' + GetBalance(_addr) +'원)');
+	}
+	
+	// Table data================================================================================================================
+	
+	//운송목록 불러오기
+	function LoadTransportTable(page){
+		loading_st();
+	
+		//선택된 페이지 붉은색/ 이전에 선택되어있던 페이즌 파란색 처리
+		if(document.getElementById('page_' + _current_page_for_delievery_table)){
+			document.getElementById('page_' + _current_page_for_delievery_table).style.color = "blue";
+			_current_page_for_delievery_table = page;       
+			document.getElementById('page_' + _current_page_for_delievery_table).style.color = "red";   
+		}
+		var contents = "";
+		var result = _contractInstance.GetDelieveryInfo.call(page - 1);
+	
+		//운송계약서로부터 운송목록을 가져와 표출해준다.
+		for(var i = 0 ; i < 10 ; i++){
+			if(result[3][i]!=0){
+				contents += '<tr id='+ result[0][i] + '><th>'+ web3.toAscii(result[1][i]) + '</th><th>' + web3.toAscii(result[2][i]) + '</th><th>' + result[3][i] + '</th><th>' + web3.toAscii(result[4][i]) + '</th><th>' + web3.toAscii(result[5][i]) + '</th><th>' + GetStatus(result[6][i]) + '</th><th>' + GetAction(result[6][i])+'</th></tr>';            
+			}
+		}
+		document.getElementById('id_transport_table_body').innerHTML = contents;
+		loading_ed();
+	}
+	//Action ==================================================================================================================
+	
+	//운송사 운송지시 클릭시
+	function Transport(item){
+		loading_st();
+		var id = item.closest('tr').attr('id');
+		_contractInstance.ExecuteDelievery.sendTransaction(id,{from: _addr, to: _transportContract,value : 0, gas : _gas
+		});
+	}
+	//Etc ====================================================================================================================
+	
+	//운송목록 페이지 UI
+	function CreatePageUI(){
+		var total = Number(_contractInstance.GetPageCountForDelieveries.call());
+		if(_max_page_for_delievery_table != total){	//새로운 페이지가 필요한지 확인한후 필요한 경우에만 페이지 UI를 새로 그려줌.
+			_max_page_for_delievery_table = total;
+			var contents = "";
+			for(var i = 1 ; i < total+1 ; i++){
+				contents += '<a id="page_'+ i +'" href="javascript:LoadTransportTable(' + i + ');">' + i + '</a><span>   </span>';  
+			}
+			document.getElementById('id_delievery_page').innerHTML = contents;	
+		}
+	}
+	
+	//Account unlock. 테스트서버 연결시에는 unlock 이 필요없다.
+	function UnlockAccount(){
+		if(_test==false){
+			web3.personal.unlockAccount(_addr, "1111");
+		}   
+	}
+</script>
+</html>

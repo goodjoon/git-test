@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>SupplierA</title>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+	<script type="text/javascript" src="bower_components/bignumber.js/bignumber.min.js"></script>
+	<script type="text/javascript" src="bower_components/web3/dist/web3.js"></script>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="joon_utils.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="scripts/sxeth.js"></script>
+	<link rel="stylesheet" type="text/css" href="loading.css">
+	
+</head>
+<body>
+	<div id="loading">
+		<div class="square">
+			<div class="spin"></div>
+		</div>
+	</div>
+	<div class="container-fluid">
+		<div class = "col-sm-12">
+
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header navbar-center">
+						<a class="navbar-brand" id="title">공급물품 등록</a>
+					</div>
+					<div class="navbar-header navbar-right">
+						<!-- <ul class="nav navbar-nav">
+							<li><a href="#" id="balance"></a></li>
+						</ul> -->
+					</div>
+				</div>
+			</nav>
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab" href="#tabPartRequest">공급물품 등록</a></li>
+				<li><a data-toggle="tab" href="#tabRelease">수주현황 및 출고지시</a></li>
+			</ul>
+			<div class="tab-content">
+				<div id="tabPartRequest" class="tab-pane fade in active">
+					<div class="form-group"></div>
+					<div class = "col-sm-7">
+						<label class="col-sm-12 text-center control-label"><font size="4">물품 목록</font></label>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<table id="id_supply_request_table" class="table table-hover">
+							<thead> 
+								<tr>
+									<th data-field="">품명</th>
+									<th data-field="">단가</th>
+									<th data-field="">납기</th>
+								</tr>
+							</thead>
+							<tbody id="id_supply_request_table_body">
+
+							</tbody>
+						</table>
+						<div class="col-xs-12" style="text-align:center;" id = "id_part_page" ></div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class="col-xs-12" style="height:10px;"></div>
+					</div>
+					<div class = "col-sm-5">
+						<label class="col-sm-12 text-center control-label">
+							<font size="4">물품 상세</font>
+						</label>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_part">품명</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_part" placeholder="OLED 부품 1" />
+							</div>
+						</div>
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_price">단가(원)</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text"  onkeypress = "CheckNumber()" class="form-control" id="id_price" placeholder="100000" />
+							</div>
+						</div>
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_due_date">납품기한(일)</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_due_date"  onkeypress = "CheckNumber()"  placeholder="15"/>
+							</div>
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-9"></div>
+							<div class = "col-sm-3">
+								<button id="issueShare" class="btn btn-primary col-sm-12" onclick=OnRequest()>등록</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="tabRelease" class="tab-pane fade">
+					<div class="form-group"></div>
+
+					<div class = "col-sm-7">
+						<label class="col-sm-12 text-center control-label"><font size="4">수주목록</font></label>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<table id="id_obtain_order_table" class="table table-hover">
+							<thead> 
+								<tr>
+									<th data-field="">발주처</th>
+									<th data-field="">품목</th>
+									<th data-field="">수량</th>
+									<th data-field="">발주일</th>
+									<th data-field="">상태</th>
+									<th data-field="">조치</th>
+								</tr>
+							</thead>
+							<tbody id="id_obtain_order_table_body">
+
+							</tbody>
+						</table>
+						<div class="col-xs-12" style="text-align:center;" id = "id_order_page" ></div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class="col-xs-12" style="height:10px;"></div>
+					</div>
+					<div class = "col-sm-5">
+						<label class="col-sm-12 text-center control-label">
+							<font size="4">출고 지시</font>
+						</label>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_contract_address">발주처</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_contract_address" placeholder="발주처" readonly/>
+							</div>
+
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_part">품명</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_part" placeholder="품명" readonly />
+							</div>
+						</div>
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_quantity">수량</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_quantity" placeholder="50" readonly />
+							</div>
+						</div>
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_price" >공급가</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_price" placeholder="5,000,000" readonly/>
+							</div>
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_deposit">발주계약금</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_deposit" placeholder="5,000,000" readonly/>
+							</div>
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_place_delievery">인도장소</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_place_delievery" placeholder="5,000,000" readonly/>
+							</div>
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_due_date">납품기한</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_due_date" placeholder="2016.05.20" readonly/>
+							</div>
+						</div>
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_place_shipment">출하장소</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_place_shipment" placeholder="파주 공장" value="FKI Tower" />
+							</div>
+						</div>
+
+					   <!--  <div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_transporter">운송사</label>
+							</div>
+							<div class = "col-sm-9">
+								<button id="id_release_btn_transporter" class="btn btn-primary dropdown-toggle col-sm-12" type="button" data-toggle="dropdown">운송처 선택(운송계약주소)
+									<span class="caret"></span>
+								</button>
+								<ul id="id_release_transporter" class="dropdown-menu">
+									<li><a>0xfb3382b3afea649cce5c28939521f49d64cfd855</a></li>
+								</ul>
+							</div>
+						</div> -->
+
+
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-3">
+								<label class="col-sm-12 text-center control-label" for="id_release_delievery_due_date">배송기한</label>
+							</div>
+							<div class = "col-sm-9">
+								<input type="text" class="form-control" id="id_release_delievery_due_date" placeholder="2016.05.20" readonly/>
+							</div>
+						</div>
+						<div class="col-xs-12" style="height:10px;"></div>
+						<div class= "form-group">
+							<div class = "col-sm-9"></div>
+							<div class = "col-sm-3">
+								<button class="btn btn-primary col-sm-12" onclick=OnReleaseComplete()>출고완료</button>                 
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	// Dependent Files 
+	// loading.css 로딩 UI css
+	// common.js 각종 설정(url, account index...)
+	var _max_page_for_part_table = 0;	//물품목록 최대 페이지 번호
+	var _max_page_for_order_table = 0;	//수주목록 최대 페이지 번호
+	var _selected_order_id = -1 ;		//출고지시 버튼 클릭을 통해 Detail정보를 갖고오기 위한 임시변수
+	var _current_page_for_part_table = 1;	//현재 선택된 페이지번호(물품목록)
+	var _current_page_for_order_table = 1;	//현재 선택된 페이지번호(수주목록)
+	
+	//Web3, Wallet 초기화
+	var Web3 = require('web3');		
+	var web3 = new Web3();
+	console.log(_url);
+	web3.setProvider(new web3.providers.HttpProvider(_url));
+	var Wallet = require('wallet');
+	var wallet = new Wallet(web3);
+
+	//계정초기화
+	var accounts = web3.eth.accounts;
+	var _addr = accounts[_supplier_a_index];   //geth node에 등록되어있는 account index : _supplier_a_index @ common.js
+
+	if(_test==false){
+		web3.personal.unlockAccount(_addr, "1111");
+	}
+
+	//Contract 설정(manufacturer.html, transporter.html 각각에서 deploy된 contract addr)
+	var Contract = web3.eth.contract(_abi_supplier);
+	var _contractInstance = Contract.at(_supplycontract);
+	_contractInstance.PartRegistered(OnPartRegistered);
+	_contractInstance.NewOrderPlaced(OnNewOrder);
+	_contractInstance.Error(OnError);
+	_contractInstance.EventStatusChange(OnStatusChanged);
+	//※※※※※※※※※※※※※※※공급사별로 운송사를 따로 지정하기 위해서는 이 부분을 수정.
+
+
+	var qsCommand = getQueryString();
+	if (qsCommand["register"] == "true") {
+		console.log("Registering Supplier and Set Contract Address..");
+
+		_contractInstance.registerSupply("LG INNOTEK",{from:_addr, to:_supplycontract, gas:_gas});
+		sleep(1000);
+		_contractInstance.SetTransportContract.sendTransaction(_transportContract,
+		{from: _addr , to: _supplycontract, value : 0, gas : _gas});
+	}
+	
+	window.onload = function(){
+	
+		//로딩중 UI 시작
+		loading_st();
+	
+		//물품목록 테이블 로딩
+		LoadPartTable(_current_page_for_part_table);//LoadPartTable(_current_page_for_part_table);
+	
+		//수주목록 테이블 로딩
+		LoadOrderTable(_current_page_for_order_table); 
+	
+		//물품목록 페이지 UI 갱신
+		CreatePartPageUI();
+	
+		//수주목록 페이지 UI 갱신
+		CreateOrderPageUI();  
+	
+		//잔고 갱신
+		UpdateBalance();
+	
+		//로딩중 UI 정지
+		loading_ed();
+	}
+	
+	//Page UI ===========================================================	
+	//수주목록 페이지 UI 생성하기
+	function CreateOrderPageUI(){
+		var total = Number(_contractInstance.GetPageCountForOrder.call({from: _addr}));
+		if( _max_page_for_order_table != total){	//새로운 페이지가 필요한지 확인한후 필요한 경우에만 페이지 UI를 새로 그려줌.
+			_max_page_for_order_table = total;
+			var contents = "";
+			for(var i = 1 ; i < total+1 ; i++){
+				contents += '<a id="page_order_'+ i +'" href="javascript:LoadOrderTable(' + i + ');">' + i + '</a><span>   </span>';	
+			}
+			document.getElementById('id_order_page').innerHTML = contents;
+		}
+	}
+	
+	//물품목록 페이지 UI 생성하기
+	function CreatePartPageUI(){
+		var total = Number(_contractInstance.GetPageCountForParts.call({from: _addr}));
+		if( _max_page_for_part_table != total){	//새로운 페이지가 필요한지 확인한후 필요한 경우에만 페이지 UI를 새로 그려줌.
+			_max_page_for_part_table = total;
+			var contents = "";
+			for(var i = 1 ; i < total+1 ; i++){
+				contents += '<a id="page_'+ i +'" href="javascript:LoadPartTable(' + i + ');">' + i + '</a><span>   </span>';	
+			}
+			document.getElementById('id_part_page').innerHTML = contents;	
+		}
+	}
+	
+	//Table Data ===========================================================
+	
+	//공급물품 목록 Table 로딩
+	function LoadPartTable(page){
+	
+		//선택된 페이지 붉은색/ 이전에 선택되어있던 페이즌 파란색 처리
+		if(document.getElementById('page_' + _current_page_for_part_table)){
+			document.getElementById('page_' + _current_page_for_part_table).style.color = "blue";
+			_current_page_for_part_table = page;		
+			document.getElementById('page_' + _current_page_for_part_table).style.color = "red";	
+		}
+	
+		//공급계약서로부터 물품목록을 가져와 표출해준다.
+		var result = _contractInstance.getPartList.call(page-1, _addr, {from: _addr});
+		if(result[0]>0){
+			var contents = "";
+			for(var i = 0 ; i < result[0] ; i ++)
+			{
+				contents +=  '<tr id=' + result[1][i] + '><th>' + web3.toAscii(result[2][i]) + '</th><th>' + web3.fromWei(result[3][i]) + '원</th><th>' + result[4][i] + '일</th></tr>';
+			}    
+			document.getElementById('id_supply_request_table_body').innerHTML = contents;
+		}
+	}
+	
+	//수주목록 Table 로딩
+	function LoadOrderTable(page){
+	
+		//선택된 페이지 붉은색/ 이전에 선택되어있던 페이즌 파란색 처리
+		if(document.getElementById('page_order_' + _current_page_for_order_table)){
+			document.getElementById('page_order_' + _current_page_for_order_table).style.color = "blue";
+			_current_page_for_order_table = page;		
+			document.getElementById('page_order_' + _current_page_for_order_table).style.color = "red";	
+		}
+	
+		//공급계약서로부터 수주목록을 가져와 표출해준다.
+		var result = _contractInstance.getOrderList.call(page-1,{ from: _addr});
+		if(result[0]>0){
+			var contents = "";
+			for(var i = 0 ; i < result[0] ; i ++){
+				contents +=  '<tr id=' + result[2][i]  +'><th>' + web3.toAscii(result[3][i]) + '</th><th>' + web3.toAscii(result[4][i]) + '</th><th>' + result[5][i]+ '</th><th>' + web3.toAscii(result[6][i]) + '</th><th>' + GetStatus(result[7][i]) + '</th><th>' + GetAction(result[7][i]) + '</th></tr>';
+			}    
+			document.getElementById('id_obtain_order_table_body').innerHTML = contents;
+		}
+	}
+
+	//0. 제조사 발주 클릭시     -> 출고대기    -> *출고지시*
+	//1. 공급사 출고완료 클릭시 -> 출고완료    -> *-*
+	//2. 운송사 운송 클릭시     -> 운송중      -> *-*
+	//3. 제조사 인수확인 클릭시 -> 인수완료    -> *-* 
+	//4. 제조사 검수확인 클릭시 -> 검수완료    -> *-*
+	
+	//주문의 상태에 따라 적절한 문구를 표출해준다.
+	function GetStatus(status){
+		if(status == 0){
+			return '출고대기';
+		}else if(status ==1){     
+			return '출고완료';
+		}else if(status ==2){       
+			return '운송중';
+		}else if(status ==3){       
+			return '인수완료';
+		}else{                      
+			return '검수완료';
+		}
+	}
+	
+	//상태에 따른 조치방법을 불러온다.
+	function GetAction(status){
+		if(status == 0){
+			return "<button class='btn btn-primary' onclick='OnReleaseOrder($(this))'>출고지시</button>";
+		}else{
+			return '-';
+		}
+	}
+	
+	//Event Callback ===========================================================
+	
+	//예외상황시 발생하는 이벤트(전송금액 부족 등)
+	function OnError(error, result){
+		if(error == null){
+			console.log('     [예외] : ' +  web3.toAscii(result.args.msg));  
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+	
+	//제조사, 공급사, 운송사의 Action으로 수주내역의 상태가 변경되었을시, 실시간으로 상태동기화 시켜준다.
+	function OnStatusChanged(error, result){
+		if(error == null){
+			if(result.args.status == 1){
+				UpdateRow(result.args.orderId, "출고완료", "-");
+			}else if(result.args.status == 2){
+				UpdateRow(result.args.orderId, "운송중", "-");
+			}else if(result.args.status == 3){
+				UpdateRow(result.args.orderId, "인수완료", "-");
+			}else if(result.args.status == 4){
+				UpdateRow(result.args.orderId, "검수완료", "-");
+				UpdateBalance();
+			}
+			loading_ed();
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+	
+	//물품이 등록되었을 때 발생하는 이벤트
+	// - 페이지 UI 갱신, 물품목록 갱신.
+	function OnPartRegistered(error, result){
+		if(error == null){
+			console.log('     [부품 등록] ' + web3.toAscii(result.args.supplierName) + ' - ' + web3.toAscii(result.args.partName));   
+			CreatePartPageUI();
+			LoadPartTable(_current_page_for_part_table);
+			loading_ed();
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+	
+	//새 수주가 들어왔을시 발생하는 이벤트
+	// - 페이지 UI 갱신, 수주목록 갱신, 잔고 갱신
+	function OnNewOrder(error, log){
+		if(error==null){            
+			CreateOrderPageUI();
+			LoadOrderTable(_current_page_for_order_table);
+			UpdateBalance();
+			loading_ed();
+		}else{
+			console.log('     [에러] : ' +  error);    
+		}
+	}
+
+	//업무 진행에 따른 Row 상태 실시간 반영
+	function UpdateRow(id, status, action){
+		if(document.getElementById("id_obtain_order_table").rows.namedItem(id)){
+			document.getElementById("id_obtain_order_table").rows.namedItem(id).cells.item(4).innerHTML = status;
+			document.getElementById("id_obtain_order_table").rows.namedItem(id).cells.item(5).innerHTML = action;	
+		}
+	}
+	
+	//업무 진행에 따른 잔고 실시간 갱신
+	function UpdateBalance(){
+		$('#title').text('공급물품 등록 (' + _supplier_a_name + " : " + GetBalance(_addr) +'원) [계좌]: '+_addr);
+	}
+	
+	//Action ===================================================================
+
+	//신규 공급계약 요청 클릭
+	function OnRequest(){
+		console.log("<공급물품 등록>");
+		var part = $('#id_part').val();
+		var price = $('#id_price').val();
+		var dueDate = $('#id_due_date').val();
+
+		if(part.length == 0 ){console.log('[에러] 부품명'); return false;}
+		if(price.length == 0 ){console.log('[에러] 단가'); return false;}
+		if(dueDate.length == 0 ){console.log('[에러] 납품기한'); return false;}
+		
+		_contractInstance.registerPart.sendTransaction(part, web3.toWei(price), dueDate,
+			{from: _addr , to: _supplycontract, value : 0, gas : _gas});
+		loading_st();
+	}
+
+	//출고지시 버튼 클릭. 오른쪽 부분의 출고를 위한 컨트롤들의 값을 입력한다.
+	function OnReleaseOrder(item){
+		console.log("<출고지시>");
+		_selected_order_id = item.closest('tr').attr('id');
+		var objTr = document.getElementById("id_obtain_order_table").rows.namedItem(_selected_order_id).cells;
+
+		$('#id_release_contract_address').val(objTr.item(0).innerHTML);
+		$('#id_release_part').val(objTr.item(1).innerHTML);
+		$('#id_release_quantity').val(objTr.item(2).innerHTML);
+		$('#id_release_place_shipment').val("");
+
+		var result = _contractInstance.GetOrderDetail.call(_selected_order_id, {from: _addr});
+		$('#id_release_price').val(web3.fromWei(result[0]) * objTr.item(2).innerHTML);
+		$('#id_release_deposit').val($('#id_release_price').val()/2);
+		
+		$('#id_release_place_delievery').val(web3.toAscii(result[2]));
+		CalculateDelieveryDate(Number(result[1]));
+		CalculateDate(Number(result[1]));
+	}
+
+	//출고완료 버튼 클릭
+	function OnReleaseComplete(){
+		
+		console.log("<출고완료>");
+		var part = $('#id_release_part').val();
+		var qty = $('#id_release_quantity').val();
+		
+		var dest = $('#id_release_place_delievery').val();
+		var src = $('#id_release_place_shipment').val();
+		var date = $('#id_release_delievery_due_date').val();
+		
+		if(part.length == 0 ){console.log('[에러] 품명'); return false;}
+		if(qty.length == 0 ){console.log('[에러] 수량'); return false;}
+		if(dest.length == 0 ){console.log('[에러] 인도장소'); return false;}
+		if(src.length == 0 ){console.log('[에러] 출하장소'); return false;}
+		if(date.length == 0 ){console.log('[에러] 배송기한'); return false;}
+		var transporterContractAddr = $('#id_release_btn_transporter').text();
+
+		_contractInstance.CreateNewDelievery.sendTransaction(_selected_order_id, src, part, qty, dest, date, 
+			{from: _addr, to: _supplycontract, value : 0,    gas : _gas});
+		loading_st();
+	}
+	
+	//Etc ===========================================================
+	
+	//납품기한 - 기등록된 부품의 납품기한 및 발주일자에 따라 계산된다.
+	function CalculateDelieveryDate(aDuration){
+		var present = new Date(); 
+		present.setDate(present.getDate() + aDuration);
+		var str = present.getFullYear().toString() + '.' + ('0' +(present.getMonth()+1)).slice(-2) + '.' + ('0' +present.getDate()).slice(-2);
+		$('#id_release_due_date').val(str);
+	}
+	
+	//배송기한 계산 - 발주주문의 납품기한 및, 기본 배송소요일자(5일) 중 더 짧은 것을 따른다.
+	function CalculateDate(aDuration){ 
+		var duration = _delievery_time;
+		if(aDuration < _delievery_time){
+			duration = aDuration;
+		}
+		var present = new Date(); 
+		present.setDate(present.getDate() + duration);
+		var str = present.getFullYear().toString() + '.' + ('0' +(present.getMonth()+1)).slice(-2) + '.' + ('0' +present.getDate()).slice(-2);
+		$('#id_release_delievery_due_date').val(str);
+	}
+
+	function getQueryString()
+	{
+		var queryString= [];
+		var hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			//queryString.push(hash[0]);
+			queryString[hash[0]] = hash[1];
+		}
+
+		return queryString;
+	}
+
+</script>
+</html>

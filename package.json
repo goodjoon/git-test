@@ -1,0 +1,18 @@
+{
+  "name": "supply_contract",
+  "version": "1.0.0",
+  "description": "Proof of Concept for ethereum based smart contract application.",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://sjoon@10.77.135.187/Users/sean/repo/dapps/SupplyContract"
+  },
+  "author": "",
+  "license": "ISC"
+}

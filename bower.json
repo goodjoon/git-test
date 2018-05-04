@@ -1,0 +1,21 @@
+{
+  "name": "supply_contract",
+  "description": "Proof of Concept for ethereum based smart contract application.",
+  "main": "app.js",
+  "authors": [
+    "GoodJoon <goodjoon@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "web3": "^0.19.0",
+    "bootstrap": "^3.3.7"
+  }
+}

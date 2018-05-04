@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contract Test</title>
+    <script type="text/javascript" src="../bower_components/web3/dist/web3.js"></script>
+    <script type="text/javascript">
+        var Web3 = require('web3');
+        var web3 = new Web3();
+
+        // GETH Node2 환경
+        web3.setProvider(new web3.providers.HttpProvider("http://10.77.135.186:8546"));
+        var block = web3.eth.getBlock('latest');
+        var blocksToRetrieve = 20;
+
+        var startBlockNumber = block.number - blocksToRetrieve;
+        for (var i = 0 ; i < blocksToRetrieve ; i++) {
+            var block = web3.eth.getBlock(i+startBlockNumber);
+            console.log('BlockHeader{big.NewInt(' + block.number.toString() +') , ' + block.timestamp.toString() + ' , big.NewInt(' + block.difficulty.toString() + ')},' );
+            var time = new Date(block.timestamp*1000); // ethereum 의 timestamp 는 SECOND 단위임. 1000 곱하기.
+            //console.log(time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds() + '.' + time.getMilliseconds());
+            // console.log(Date.now()); ==> milliseconds
+        }
+    </script>
+</head>
+<body>
+Contract Test Page<br/>
+Contract Address : 0xf3164382837a34f13671e48f96c07946a9cb56e9
+</body>
+</html>
