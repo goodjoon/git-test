@@ -1,4 +1,4 @@
-## LG CNS Blockchain PoC-3 (Supply Chain PoC)
+## MY Blockchain PoC-3 (Supply Chain PoC)
 
 Proof of Concept for ethereum based smart contract application. 
 
