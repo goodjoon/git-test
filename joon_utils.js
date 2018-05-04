@@ -1,6 +1,12 @@
 function SX() {}
 
-var Converter = SX.Converter = function () {}
+var Converter = SX.Converter = function () {
+	return {
+		"name":"Joon
+	}
+}
+
+
 // Converter
 Converter.cleanHexString = function(strHex) {
     var ret = strHex.trim().toLowerCase();
